@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ReservationStatus {
+  PENDING
+  COMPLETED
+  EXPIRED
+  CANCELLED
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String?
+  reservations Reservation[]
+  orders       Order[]
+}
+
+model Product {
+  id             String         @id @default(uuid())
+  name           String
+  description    String
+  price          Decimal
+  totalStock     Int
+  availableStock Int
+  version        Int            @default(0)
+  reservations   Reservation[]
+  orders         Order[]
+  inventoryLogs  InventoryLog[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Reservation {
+  id       String            @id @default(uuid())
+  status   ReservationStatus @default(PENDING)
+  quantity Int               @default(1)
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  order     Order?
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Order {
+  id          String  @id @default(uuid())
+  totalAmount Decimal
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  reservationId String      @unique
+  reservation   Reservation @relation(fields: [reservationId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model InventoryLog {
+  id     String @id @default(uuid())
+  change Int
+  reason String
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+}
