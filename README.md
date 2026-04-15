@@ -2,23 +2,23 @@
 
 A high-concurrency limited-stock product drop system. Built to handle the "100 users, 3 units" problem — where simultaneous requests must never oversell stock, reservations expire automatically, and every stock movement is audited.
 
-**Live:** `https://your-app.onrender.com`  
+**Live:** https://stocklock-backend-mxos.onrender.com  
 **Loom walkthrough:** `https://loom.com/...`
 
 ---
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Runtime | Node.js 20 + TypeScript (strict) |
-| Framework | Express 5 |
-| ORM | Prisma 7 + PostgreSQL (Supabase) |
-| Validation | Zod 4 |
-| Auth | JWT (jsonwebtoken + bcrypt) |
-| Logging | Winston |
-| Testing | Jest + ts-jest |
-| Hosting | Render + UptimeRobot |
+| Layer      | Technology                       |
+| ---------- | -------------------------------- |
+| Runtime    | Node.js 20 + TypeScript (strict) |
+| Framework  | Express 5                        |
+| ORM        | Prisma 7 + PostgreSQL (Supabase) |
+| Validation | Zod 4                            |
+| Auth       | JWT (jsonwebtoken + bcrypt)      |
+| Logging    | Winston                          |
+| Testing    | Jest + ts-jest                   |
+| Hosting    | Render + UptimeRobot             |
 
 ---
 
@@ -45,7 +45,7 @@ Mapped to Prisma:
 const updated = await tx.product.updateMany({
   where: {
     id: input.productId,
-    version: product.version,        // must still match what we read
+    version: product.version, // must still match what we read
     availableStock: { gte: input.quantity },
   },
   data: {
@@ -97,40 +97,41 @@ Most databases don't have native TTL on rows. Storing `expiresAt` as a `DateTime
 
 Base URL: `/api/v1`
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| POST | `/users/register` | — | Create account |
-| POST | `/users/login` | — | Get JWT token |
-| GET | `/products` | — | List products (paginated, filtered, sorted) |
-| GET | `/products/:id` | — | Single product |
-| POST | `/reservations/reserve` | JWT | Reserve a product |
-| POST | `/reservations/:id/checkout` | JWT | Complete purchase |
-| GET | `/metrics` | — | Live system metrics |
-| GET | `/health` | — | Health check |
+| Method | Endpoint                     | Auth | Description                                 |
+| ------ | ---------------------------- | ---- | ------------------------------------------- |
+| POST   | `/users/register`            | —    | Create account                              |
+| POST   | `/users/login`               | —    | Get JWT token                               |
+| GET    | `/products`                  | —    | List products (paginated, filtered, sorted) |
+| GET    | `/products/:id`              | —    | Single product                              |
+| POST   | `/reservations/reserve`      | JWT  | Reserve a product                           |
+| POST   | `/reservations/:id/checkout` | JWT  | Complete purchase                           |
+| GET    | `/metrics`                   | —    | Live system metrics                         |
+| GET    | `/health`                    | —    | Health check                                |
 
 ### Query Parameters for `GET /products`
 
-| Param | Type | Default | Description |
-|---|---|---|---|
-| `page` | number | 1 | Page number |
-| `limit` | number | 20 | Results per page (max 100) |
-| `name` | string | — | Search by name |
-| `inStock` | `"true"` \| `"false"` | — | Filter by availability |
-| `sortBy` | `name` \| `price` \| `availableStock` \| `createdAt` | `createdAt` | Sort field |
-| `order` | `asc` \| `desc` | `desc` | Sort direction |
+| Param     | Type                                                 | Default     | Description                |
+| --------- | ---------------------------------------------------- | ----------- | -------------------------- |
+| `page`    | number                                               | 1           | Page number                |
+| `limit`   | number                                               | 20          | Results per page (max 100) |
+| `name`    | string                                               | —           | Search by name             |
+| `inStock` | `"true"` \| `"false"`                                | —           | Filter by availability     |
+| `sortBy`  | `name` \| `price` \| `availableStock` \| `createdAt` | `createdAt` | Sort field                 |
+| `order`   | `asc` \| `desc`                                      | `desc`      | Sort direction             |
 
 ---
 
 ## Running Locally
 
 ### Prerequisites
+
 - Node.js 20+
 - A PostgreSQL database (Supabase free tier works)
 
 ### Setup
 
 ```bash
-git clone https://github.com/your-username/stocklock
+git clone https://github.com/Toviarock1/stocklock
 cd stocklock
 npm install
 ```
@@ -231,14 +232,14 @@ With multiple servers, every instance runs its own `node-cron` expiry job — th
 
 ## How to Scale It
 
-| Concern | Current | At Scale |
-|---|---|---|
-| Stock counter | Postgres `updateMany` + version | Redis Lua atomic decrement |
-| Connection pooling | pg.Pool (max 10) | PgBouncer transaction mode |
-| Servers | Single process | Multiple instances + load balancer |
-| Cron | In-process node-cron | Dedicated worker + Redis distributed lock |
-| Auth | Stateless JWT | Same (scales naturally) |
-| Observability | Winston file logs | Centralised log aggregation (Datadog, Logtail) |
+| Concern            | Current                         | At Scale                                       |
+| ------------------ | ------------------------------- | ---------------------------------------------- |
+| Stock counter      | Postgres `updateMany` + version | Redis Lua atomic decrement                     |
+| Connection pooling | pg.Pool (max 10)                | PgBouncer transaction mode                     |
+| Servers            | Single process                  | Multiple instances + load balancer             |
+| Cron               | In-process node-cron            | Dedicated worker + Redis distributed lock      |
+| Auth               | Stateless JWT                   | Same (scales naturally)                        |
+| Observability      | Winston file logs               | Centralised log aggregation (Datadog, Logtail) |
 
 ---
 
