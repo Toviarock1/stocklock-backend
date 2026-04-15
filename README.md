@@ -2,8 +2,7 @@
 
 A high-concurrency limited-stock product drop system. Built to handle the "100 users, 3 units" problem — where simultaneous requests must never oversell stock, reservations expire automatically, and every stock movement is audited.
 
-**Live:** https://stocklock-backend-mxos.onrender.com  
-**Loom walkthrough:** `https://loom.com/...`
+**Live:** https://stocklock-backend-mxos.onrender.com
 
 ---
 
